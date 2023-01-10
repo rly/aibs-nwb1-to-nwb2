@@ -19,14 +19,15 @@ from pynwb.image import OpticalSeries, IndexSeries
 # from pynwb.image import GrayscaleImage
 from pynwb.misc import IntervalSeries
 import pytz
+import argparse
+import os
 
-
-def main():
+def main(path_nwb_1, path_nwb_2, path_output):
     """Main function."""
-    old_nwb_path = "/Users/rly/Downloads/Cux2-CreERT2_511507650_500855614_old.nwb"
-    suite2p_out_path = "/Users/rly/Downloads/Cux2-CreERT2_511507650_500855614 copy.nwb"
-    temp_merged_path = "/Users/rly/Downloads/Cux2-CreERT2_511507650_500855614_temp.nwb"
-    export_path = "/Users/rly/Downloads/Cux2-CreERT2_511507650_500855614_export.nwb"
+    old_nwb_path = path_nwb_1
+    suite2p_out_path = path_nwb_2
+    temp_merged_path = os.path.join(os.path.split(path_output)[0], 'temp.nwb')
+    export_path = path_output
 
     # open the suite2p output NWB file in read mode
     with NWBHDF5IO(suite2p_out_path, "r") as io:
@@ -66,7 +67,9 @@ def main():
                     nwbfile=export_nwbfile,
                     write_args={"link_data": False},
                 )
-
+    
+    # we remove tmp file
+    os.remove(temp_merged_path)
 
 def _unicode(s: str | bytes):
     """A helper function for converting a string or bytes object to Unicode."""
@@ -295,4 +298,15 @@ def add_suite2p_output(out_nwbfile: NWBFile, in_nwbfile: NWBFile):
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--path_nwb_1', type=str, required=True)
+    parser.add_argument('--path_nwb_2', type=str, required=True)
+    parser.add_argument('--path_output', type=str, required=True)
+
+    args = parser.parse_args()
+    path_nwb_1 = args.path_nwb_1
+    path_nwb_2 = args.path_nwb_2
+    path_output = args.path_output
+
+
+    main(path_nwb_1, path_nwb_2, path_output)
